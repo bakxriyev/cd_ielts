@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { ListeningQuestion } from "./entities/listening_question.entity";
 import { CreateListeningQuestionDto, UpdateListeningQuestionDto } from "./dto";
+import { LQuestion } from "../l_questions/entities/l_question.entity";
 
 @Injectable()
 export class ListeningQuestionService {
@@ -13,47 +14,34 @@ export class ListeningQuestionService {
   async create(dto: CreateListeningQuestionDto, audio?: string): Promise<ListeningQuestion> {
     return this.questionModel.create({
       ...dto,
-      options: dto.options as any, // controllerda arrayga aylantiriladi
-      correct_answers: dto.correct_answers as any,
       audio,
       created_at: new Date(),
     });
   }
 
   async findAll(): Promise<ListeningQuestion[]> {
-    return this.questionModel.findAll({ include: { all: true } });
+    return this.questionModel.findAll({ 
+      include: [LQuestion] 
+    });
   }
 
   async findOne(id: number): Promise<ListeningQuestion> {
-    const question = await this.questionModel.findByPk(id, { include: { all: true } });
+    const question = await this.questionModel.findByPk(id, 
+      {include: [LQuestion] 
+        
+      });
     if (!question) throw new NotFoundException("Listening question not found");
     return question;
   }
 
-  async update(id: number, dto: UpdateListeningQuestionDto, photo?: string): Promise<ListeningQuestion> {
-  const question = await this.findOne(id);
+  async update(id: number, dto: UpdateListeningQuestionDto, audio?: string): Promise<ListeningQuestion> {
+    const question = await this.findOne(id);
 
-  // options va correct_answersni arrayga aylantirish
-  const optionsArray: string[] | undefined = dto.options
-    ? Array.isArray(dto.options)
-      ? dto.options
-      : dto.options.split(",").map(o => o.trim())
-    : undefined;
-
-  const correctAnswersArray: string[] | undefined = dto.correct_answers
-    ? Array.isArray(dto.correct_answers)
-      ? dto.correct_answers
-      : dto.correct_answers.split(",").map(a => a.trim())
-    : undefined;
-
-  return question.update({
-    ...dto,
-    options: optionsArray ?? question.options,
-    correct_answers: correctAnswersArray ?? question.correct_answers,
-    audio: photo ?? question.audio,
-  });
-}
-
+    return question.update({
+      ...dto,
+      audio: audio ?? question.audio,
+    });
+  }
 
   async remove(id: number): Promise<void> {
     const question = await this.findOne(id);

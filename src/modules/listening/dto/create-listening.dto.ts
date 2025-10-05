@@ -14,4 +14,9 @@ export class CreateListeningDto {
   @IsOptional()
   description: string
 
+  @ApiProperty({ example: "http://example.com/audio.mp3", description: "Audio file URL" })
+  @IsString()
+  @IsNotEmpty()
+  audio_url: string
+
 }

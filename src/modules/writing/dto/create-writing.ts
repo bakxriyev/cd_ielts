@@ -1,23 +1,21 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator"
-import { WritingPart } from "../model/writing-parts"
+import { ApiProperty } from "@nestjs/swagger";
+import { WritingPart } from "../model/writing-parts";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateWritingDto {
-  @ApiProperty({ example: 1, description: "Exam ID" })
+  @ApiProperty({ example: 1 })
   @IsNotEmpty()
-  exam_id: number
+  exam_id: number;
 
-  @ApiProperty({ enum: WritingPart , description: "Writing part" })
-  @IsEnum(WritingPart)
-  part: WritingPart
-
-  @ApiProperty({ example: "Write an essay about technology.", description: "Task text" })
-  @IsString()
+  @ApiProperty({ enum: WritingPart })
   @IsNotEmpty()
-  task_text: string
+  part: WritingPart;
 
-  @ApiPropertyOptional({ type: "string", format: "binary", description: "Task image (optional)" })
+  @ApiProperty({ example: "Write an essay about global warming." })
+  @IsNotEmpty()
+  task_text: string;
+
+  @ApiProperty({ type: "string", format: "binary", required: false })
   @IsOptional()
-  task_image?: Express.Multer.File
-
+  task_image?: any;
 }

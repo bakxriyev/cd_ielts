@@ -1,6 +1,8 @@
+// models/reading.model.ts
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from "sequelize-typescript";
 import { Exam } from "../exam/exam.model";
 import { ReadingQuestion } from "../reading_question/model/reading_question.entity";
+import { Passage } from "../passages/model/passage.entity";
 
 @Table({ tableName: "readings", timestamps: false })
 export class Reading extends Model<Reading> {
@@ -14,9 +16,6 @@ export class Reading extends Model<Reading> {
   @Column(DataType.STRING)
   passage_title: string;
 
-  @Column(DataType.TEXT)
-  passage_text: string;
-
   @Column(DataType.DATE)
   created_at: Date;
 
@@ -25,4 +24,8 @@ export class Reading extends Model<Reading> {
 
   @HasMany(() => ReadingQuestion)
   questions: ReadingQuestion[];
+
+  @HasMany(() => Passage)
+  passages: Passage[];
+  
 }

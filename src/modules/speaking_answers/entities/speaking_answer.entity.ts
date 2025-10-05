@@ -9,8 +9,8 @@ export class SpeakingAnswer extends Model<SpeakingAnswer> {
   id: number
 
   @ForeignKey(() => User)
-  @Column(DataType.BIGINT)
-  user_id: number
+  @Column(DataType.STRING)
+  user_id: string
 
   @ForeignKey(() => Exam)
   @Column(DataType.BIGINT)
@@ -23,7 +23,7 @@ export class SpeakingAnswer extends Model<SpeakingAnswer> {
   @Column(DataType.STRING)
   audio_answer: string
 
-  @Column(DataType.INTEGER)
+  @Column(DataType.FLOAT)
   score: number
 
   @Column(DataType.DATE)

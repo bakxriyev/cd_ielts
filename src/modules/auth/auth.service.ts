@@ -1,88 +1,54 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common"
-import { JwtService } from "@nestjs/jwt"
-import { ConfigService } from "@nestjs/config"
-import { UserService } from "../user/user.service"
-import type { LoginDto } from "./dto/login.dto"
-import type { RegisterDto } from "./dto/register.dto"
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { AdminService } from "../admin/admin.service";
+import { ClientService } from "../client/client.service";
+import { LoginDto } from "./dto/login.dto";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly adminService: AdminService,
+    private readonly clientService: ClientService
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.findByUsername(username)
-    if (user && user.password === password) {
-      const { password, ...result } = user.toJSON()
-      return result
-    }
-    return null
-  }
-
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.username, loginDto.password)
-    if (!user) {
-      throw new UnauthorizedException("Foydalanuvchi topilmadi")
-    }
-
-    const payload = { username: user.username, sub: user.id}
+  private generateTokens(payload: any) {
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
       expiresIn: this.configService.get<string>("JWT_ACCESS_EXPIRES_IN"),
-    })
+    });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
       expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRES_IN"),
-    })
+    });
 
-    await this.userService.updateRefreshToken(user.id, refreshToken)
-
-    return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      },
-    }
+    return { accessToken, refreshToken };
   }
 
-  async register(registerDto: RegisterDto) {
-    const user = await this.userService.create(registerDto)
-    const { password, ...result } = user.toJSON()
-    return result
-  }
-
-  async refreshToken(refreshToken: string, userId: number) {
-  try {
-    const payload = this.jwtService.verify(refreshToken, {
-      secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
-    })
-
-    const user = await this.userService.findOne(userId)
-    if (!user || user.refreshToken !== refreshToken) {
-      throw new UnauthorizedException("Invalid refresh token")
+  async loginAdmin(dto: LoginDto) {
+    const admin = await this.adminService.findByEmail(dto.email);
+    if (!admin || admin.password !== dto.password) {
+      throw new UnauthorizedException("Admin not found or wrong password");
     }
 
-    const newPayload = { username: user.username, sub: user.id }
-    const newAccessToken = this.jwtService.sign(newPayload, {
-      secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
-      expiresIn: this.configService.get<string>("JWT_ACCESS_EXPIRES_IN"),
-    })
+    const tokens = this.generateTokens({ email: admin.email, sub: admin.id, role: "admin" });
+    await this.adminService.updateRefreshToken(admin.id, tokens.refreshToken);
 
-    return { access_token: newAccessToken }
-  } catch {
-    throw new UnauthorizedException("Invalid refresh token")
+    return { ...tokens, admin };
   }
-}
 
-  async logout(userId: number) {
-    await this.userService.updateRefreshToken(userId, null)
-    return { message: "Logged out successfully" }
+  async loginClient(dto: LoginDto) {
+    const client = await this.clientService.findByEmail(dto.email);
+    if (!client || client.password !== dto.password) {
+      throw new UnauthorizedException("Client not found or wrong password");
+    }
+
+    const tokens = this.generateTokens({ email: client.email, sub: client.id, role: "client" });
+    await this.clientService.updateRefreshToken(client.id, tokens.refreshToken);
+
+    return { ...tokens, client };
   }
 }

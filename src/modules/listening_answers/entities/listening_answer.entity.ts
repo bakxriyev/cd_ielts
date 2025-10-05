@@ -2,6 +2,7 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize
 import { User } from "../../user/user.model"
 import { Exam } from "../../exam/exam.model"
 import { ListeningQuestion } from "../../listening_question/entities/listening_question.entity"
+import { LQuestion } from "../../l_questions/entities/l_question.entity"
 
 @Table({ tableName: "listening_answers", timestamps: false })
 export class ListeningAnswer extends Model<ListeningAnswer> {
@@ -9,8 +10,8 @@ export class ListeningAnswer extends Model<ListeningAnswer> {
   id: number
 
   @ForeignKey(() => User)
-  @Column(DataType.BIGINT)
-  userId: number
+  @Column(DataType.STRING)
+  userId: string
 
   @ForeignKey(() => Exam)
   @Column(DataType.BIGINT)
@@ -18,10 +19,14 @@ export class ListeningAnswer extends Model<ListeningAnswer> {
 
   @ForeignKey(() => ListeningQuestion)
   @Column(DataType.BIGINT)
-  listening_question_id: number
+  questionId: number
 
-  @Column(DataType.STRING)
-  user_answer: string
+  @ForeignKey(() => LQuestion)
+  @Column(DataType.BIGINT)
+  l_questionsID: number;
+
+  @Column({ type: DataType.JSONB, allowNull: true })
+  answer: any
 
   @Column(DataType.BOOLEAN)
   is_correct: boolean
@@ -29,11 +34,17 @@ export class ListeningAnswer extends Model<ListeningAnswer> {
   @Column(DataType.DATE)
   submitted_at: Date
 
+  @Column({ type: DataType.STRING, allowNull: false })
+  question_type: string;
+
   @BelongsTo(() => User)
   user: User
 
   @BelongsTo(() => Exam)
   exam: Exam
+
+  @BelongsTo(() => LQuestion)
+  lQuestion: LQuestion;
 
   @BelongsTo(() => ListeningQuestion)
   question: ListeningQuestion

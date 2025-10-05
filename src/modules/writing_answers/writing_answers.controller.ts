@@ -1,17 +1,5 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Param,
-  Delete,
-  Put,
-  Body,
-  UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common"
-import { FileInterceptor } from "@nestjs/platform-express"
-import { diskStorage } from "multer"
-import { ApiTags, ApiConsumes, ApiBody } from "@nestjs/swagger"
+import { Controller, Get, Post, Body, Param, Delete, Put } from "@nestjs/common"
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger"
 import { WritingAnswersService } from "./writing_answers.service"
 import { CreateWritingAnswerDto, UpdateWritingAnswerDto } from "./dto"
 
@@ -21,43 +9,33 @@ export class WritingAnswersController {
   constructor(private readonly writingAnswersService: WritingAnswersService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor("answer_file", {
-      storage: diskStorage({
-        destination: "./uploads/writing-answers",
-        filename: (req, file, cb) => {
-          cb(null, Date.now() + "-" + file.originalname)
-        },
-      }),
-    }),
-  )
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({ type: CreateWritingAnswerDto })
-  create(@Body() dto: CreateWritingAnswerDto, @UploadedFile() file: Express.Multer.File) {
+  @ApiOperation({ summary: "Yangi writing javob yaratish" })
+  @ApiResponse({ status: 201, description: "Writing answer created successfully" })
+  create(@Body() dto: CreateWritingAnswerDto) {
     return this.writingAnswersService.create(dto)
   }
 
   @Get()
+  @ApiOperation({ summary: "Barcha writing javoblarni olish" })
   findAll() {
     return this.writingAnswersService.findAll()
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.writingAnswersService.findOne(+id)
+  @ApiOperation({ summary: "ID bo‘yicha writing javobni olish" })
+  findOne(@Param("id") id: number) {
+    return this.writingAnswersService.findOne(id)
   }
 
   @Put(":id")
-  @ApiBody({ type: UpdateWritingAnswerDto })
-  update(
-    @Param("id") id: string,
-    @Body() dto: UpdateWritingAnswerDto,
-  ) {
-    return this.writingAnswersService.update(+id, dto)
+  @ApiOperation({ summary: "Writing javobni yangilash" })
+  update(@Param("id") id: number, @Body() dto: UpdateWritingAnswerDto) {
+    return this.writingAnswersService.update(id, dto)
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.writingAnswersService.remove(+id)
+  @ApiOperation({ summary: "Writing javobni o‘chirish" })
+  remove(@Param("id") id: number) {
+    return this.writingAnswersService.remove(id)
   }
 }

@@ -1,4 +1,4 @@
 export enum WritingPart {
-  TASK1 = "task1",
-  TASK2 = "task2",
+  PART1 = "PART1",
+  PART2 = "PART2",
 }

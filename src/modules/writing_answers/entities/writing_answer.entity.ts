@@ -2,6 +2,7 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize
 import { User } from "../../user/user.model"
 import { Exam } from "../../exam/exam.model"
 import { Writing } from "../../writing/model/writing.model"
+import { WritingPart } from "@/modules/writing/model/writing-parts"
 
 @Table({ tableName: "writing_answers", timestamps: false })
 export class WritingAnswer extends Model<WritingAnswer> {
@@ -9,8 +10,8 @@ export class WritingAnswer extends Model<WritingAnswer> {
   id: number
 
   @ForeignKey(() => User)
-  @Column(DataType.BIGINT)
-  user_id: number
+  @Column(DataType.STRING)
+  user_id: string
 
   @ForeignKey(() => Exam)
   @Column(DataType.BIGINT)
@@ -19,6 +20,12 @@ export class WritingAnswer extends Model<WritingAnswer> {
   @ForeignKey(() => Writing)
   @Column(DataType.BIGINT)
   writing_id: number
+
+ @Column({
+    type: DataType.ENUM(...Object.values(WritingPart)),
+    allowNull: true,
+  })
+  part: WritingPart
 
   @Column(DataType.TEXT)
   answer_text: string

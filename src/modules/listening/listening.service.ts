@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectModel } from "@nestjs/sequelize"
 import { Listening } from "./listening.model"
 import { CreateListeningDto, UpdateListeningDto } from "./dto"
+import { ListeningQuestion } from "../listening_question/entities/listening_question.entity"
+import { LQuestion } from "../l_questions/entities/l_question.entity"
 
 @Injectable()
 export class ListeningService {
@@ -16,11 +18,24 @@ export class ListeningService {
   }
 
   async findAll(): Promise<Listening[]> {
-    return this.listeningModel.findAll({ include: { all: true } })
+    return this.listeningModel.findAll({ 
+      include: [
+        {
+          model: ListeningQuestion,
+          include: [LQuestion]
+        }
+      ] 
+    
+    })
   }
 
   async findOne(id: number): Promise<Listening> {
-    const listening = await this.listeningModel.findByPk(id, { include: { all: true } })
+    const listening = await this.listeningModel.findByPk(id, { include: [
+        {
+          model: ListeningQuestion,
+          include: [LQuestion]
+        }
+      ]  })
     if (!listening) throw new NotFoundException("Listening not found")
     return listening
   }

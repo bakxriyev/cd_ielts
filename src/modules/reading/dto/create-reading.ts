@@ -11,12 +11,4 @@ export class CreateReadingDto {
   @IsNotEmpty()
   passage_title: string
 
-  @ApiProperty({ example: "Artificial Intelligence has a long history...", description: "Passage text" })
-  @IsString()
-  passage_text: string
-
-  @ApiProperty({ example: "Reading passage", description: "Reading date" }) 
-  @IsString()
-  title: string
-
 }

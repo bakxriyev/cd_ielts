@@ -1,20 +1,36 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { PartialType } from "@nestjs/swagger";
+import { CreateListeningAnswerDto } from "./create-listening_answer.dto";
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsOptional, IsString, IsBoolean, IsNumber, IsDate } from "class-validator";
 
-
-export class UpdateListeningAnswerDto {
-  @ApiProperty({ example: "C", required: false })
+export class UpdateListeningAnswerDto extends PartialType(CreateListeningAnswerDto) {
+  @ApiPropertyOptional({ example: "B", description: "Updated user answer" })
   @IsOptional()
   @IsString()
-  user_answer?: string
+  user_answer?: string;
 
-  @ApiProperty({ example: false, required: false })
+  @ApiPropertyOptional({ example: true, description: "Mark answer as correct or not" })
   @IsOptional()
   @IsBoolean()
-  is_correct?: boolean
+  is_correct?: boolean;
 
-  @ApiProperty({ example: "2025-08-28T12:30:00Z", required: false })
+  @ApiPropertyOptional({ example: "2025-09-27T15:40:00Z", description: "Update time" })
   @IsOptional()
-  @IsDateString()
-  submitted_at?: Date
+  @IsDate()
+  submitted_at?: Date;
+
+  @ApiPropertyOptional({ example: "TFNG", description: "Question type" })
+  @IsOptional()
+  @IsString()
+  answer_type?: string;
+
+  @ApiPropertyOptional({ example: 1, description: "Updated LQuestion ID" })
+  @IsOptional()
+  @IsNumber()
+  l_question_id?: number;
+
+  @ApiPropertyOptional({ example: 3, description: "Updated exam ID" })
+  @IsOptional()
+  @IsNumber()
+  examId?: number;
 }

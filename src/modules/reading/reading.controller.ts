@@ -4,9 +4,9 @@ import { CreateReadingDto } from "./dto/create-reading"
 import { UpdateReadingDto } from "./dto/update-rading"
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from "@nestjs/swagger"
 import { FileInterceptor } from "@nestjs/platform-express"
-import { UploadFileDto } from "./dto/upload-dto"
 
 @ApiTags("Reading")
+
 @Controller("reading")
 export class ReadingController {
   constructor(private readonly readingService: ReadingService) {}
@@ -41,17 +41,4 @@ export class ReadingController {
     return this.readingService.remove(id)
   }
 
-  @Post("upload")
-  @ApiOperation({ summary: "Upload file (photo/audio)" })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({ type: UploadFileDto })
-  @UseInterceptors(FileInterceptor("file"))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return {
-      filename: file.filename,
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-    }
-  }
 }

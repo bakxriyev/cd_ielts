@@ -1,12 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
-import { ExamType } from "./create-exam.dto"
 
 export class UpdateExamDto {
-  @ApiProperty({ enum: ExamType, required: false })
-  @IsOptional()
-  @IsEnum(ExamType)
-  exam_type?: ExamType
 
   @ApiProperty({ required: false })
   @IsOptional()

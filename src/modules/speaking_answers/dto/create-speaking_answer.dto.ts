@@ -1,10 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNumber, IsOptional } from "class-validator"
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 
 export class CreateSpeakingAnswerDto {
   @ApiProperty({ example: 1, description: "User ID" })
-  @IsNumber()
-  user_id: number
+  @IsNotEmpty()
+  @IsString()
+  user_id: string
 
   @ApiProperty({ example: 2, description: "Exam ID" })
   @IsNumber()

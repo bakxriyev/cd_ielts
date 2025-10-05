@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNumber, IsOptional, IsDateString } from "class-validator"
+import { IsNumber, IsOptional } from "class-validator"
 
 export class UpdateResultDto {
   @ApiProperty({ example: 36, description: "Reading correct answers", required: false })
@@ -12,12 +12,28 @@ export class UpdateResultDto {
   @IsNumber()
   listening_correct_answers?: number
 
-  @ApiProperty({ example: 8, description: "Writing score", required: false })
+  @ApiProperty({ example: 6.5, description: "Writing part 1 score", required: false })
   @IsOptional()
   @IsNumber()
-  writing_score?: number
+  writing_part1_score?: number
 
-  @ApiProperty({ example: 7.5, description: "Speaking score", required: false })
+  @ApiProperty({ example: 7, description: "Writing part 2 score", required: false })
   @IsOptional()
-  speaking_score?: string
+  @IsNumber()
+  writing_part2_score?: number
+
+  @ApiProperty({ example: 7.5, description: "Writing band score", required: false })
+  @IsOptional()
+  @IsNumber()
+  writing_band_score?: number
+
+  @ApiProperty({ example: 7.0, description: "Speaking score", required: false })
+  @IsOptional()
+  @IsNumber()
+  speaking_score?: number
+
+  @ApiProperty({ example: 7.2, description: "Overall band score", required: false })
+  @IsOptional()
+  @IsNumber()
+  overall_band_score?: number
 }

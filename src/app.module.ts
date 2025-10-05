@@ -13,7 +13,7 @@ import { ListeningModule } from "./modules/listening/listening.module";
 import { ReadingModule } from "./modules/reading/reading.module";
 import { WritingModule } from "./modules/writing/writing.module";
 import { SpeakingModule } from "./modules/speaking/speaking.module";
-import { ResultModule } from "./modules/result/result.module";
+import { ResultsModule } from "./modules/result/result.module";
 import { ReadingQuestionModule } from "./modules/reading_question/reading_question.module";
 import { ListeningQuestionModule } from "./modules/listening_question/listening_question.module";
 import { ListeningAnswerModule } from "./modules/listening_answers/listening_answers.module";
@@ -22,6 +22,15 @@ import { WritingAnswersModule } from "./modules/writing_answers/writing_answers.
 import { ReadingAnswersModule } from "./modules/reading_answers/reading_answers.module";
 
 import { ServeStaticModule } from "@nestjs/serve-static";
+import { AdminModule } from './modules/admin/admin.module';
+import { ClientModule } from './modules/client/client.module';
+import { RQuestionModule } from "./modules/reading_subquestions/reading_subquestions.module";
+import { LQuestionModule } from "./modules/l_questions/l_questions.module";
+import { AdminSeed } from "./seeders/create-admin";
+import { Admin } from "./modules/admin/model/admin.entity";
+import { PassagesModule } from './modules/passages/passages.module';
+
+
 
 @Module({
   imports: [
@@ -55,6 +64,7 @@ import { ServeStaticModule } from "@nestjs/serve-static";
         logging: config.get<string>("app.nodeEnv") === "development",
       }),
     }),
+    SequelizeModule.forFeature([Admin]),
 
     MailerModule.forRootAsync({
       imports: [ConfigModule],
@@ -87,13 +97,19 @@ import { ServeStaticModule } from "@nestjs/serve-static";
     ReadingModule,
     WritingModule,
     SpeakingModule,
-    ResultModule,
+    ResultsModule,
     ReadingQuestionModule,
     ListeningQuestionModule,
     ListeningAnswerModule,
     SpeakingAnswerModule,
     WritingAnswersModule,
     ReadingAnswersModule,
+    AdminModule,
+    ClientModule,
+    RQuestionModule,
+    LQuestionModule,
+    PassagesModule,
   ],
+  providers: [AdminSeed]
 })
 export class AppModule {}

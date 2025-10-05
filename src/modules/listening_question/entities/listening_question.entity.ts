@@ -2,18 +2,9 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from "
 import { Listening } from "../../listening/listening.model"
 import { ListeningAnswer } from "../../listening_answers/entities/listening_answer.entity"
 import { ListeningPart } from "./listening-parts"
+import { LQuestion } from "@/modules/l_questions/entities/l_question.entity"
 
 
-// listening-question-type.enum.ts
-export enum ListeningQuestionType {
-  FORM_COMPLETION = "form_completion",          // Form/Note/Table/Flow-chart/Summary Completion
-  SENTENCE_COMPLETION = "sentence_completion",  // Sentence Completion
-  SHORT_ANSWER = "short_answer",                // Short Answer Questions
-  MULTIPLE_CHOICE = "multiple_choice",          // Multiple Choice Questions (MCQ)
-  MATCHING = "matching",                        // Matching (people, places, ideas)
-  MAP_LABELING = "map_labeling",                // Map/Plan/Diagram Labelling
-  PICK_FROM_LIST = "pick_from_list",            // Pick from a List
-}
 
 
 @Table({ tableName: "listening_questions", timestamps: false })
@@ -25,35 +16,17 @@ export class ListeningQuestion extends Model<ListeningQuestion> {
   @Column(DataType.BIGINT)
   listening_id: number
 
-  @Column({
-    type: DataType.ENUM(...Object.values(ListeningPart)),
-    allowNull: false,
-  })
-  part: ListeningPart
+  @Column({ type: DataType.STRING, allowNull: true })
+  title: string;
 
-  @Column(DataType.STRING)
-  title: string
+  @Column({ type: DataType.TEXT, allowNull: true })
+  instruction: string;
 
-  @Column(DataType.TEXT)
-  question_text: string
+  @Column({ type: DataType.STRING, allowNull: true })
+  photo: string;
 
-  @Column({
-    type: DataType.ENUM(...Object.values(ListeningQuestionType)),
-    allowNull: false,
-  })
-  question_type: ListeningQuestionType
-
-  @Column({
-    type: DataType.ARRAY(DataType.STRING),
-    allowNull: false,
-  })
-  options: string[]
-
-  @Column({
-    type: DataType.ARRAY(DataType.STRING),
-    allowNull: false,
-  })
-  correct_answers: string[]
+  @Column({ type: DataType.ENUM("PART1", "PART2", "PART3","PART4"), allowNull: false })
+  part: string;
 
   @Column(DataType.STRING)
   audio: string
@@ -64,6 +37,9 @@ export class ListeningQuestion extends Model<ListeningQuestion> {
   @BelongsTo(() => Listening)
   listening: Listening
 
+  @HasMany(() => LQuestion)
+  l_questions: LQuestion[];
+
   @HasMany(() => ListeningAnswer)
-  answers: ListeningAnswer[]
+  listening_answers: ListeningAnswer[];
 }

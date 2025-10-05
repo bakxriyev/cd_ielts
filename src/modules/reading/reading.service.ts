@@ -3,6 +3,9 @@ import { InjectModel } from "@nestjs/sequelize"
 import { Reading } from "./reading.model"
 import { CreateReadingDto } from "./dto/create-reading"
 import { UpdateReadingDto } from "./dto/update-rading"
+import { ReadingQuestion } from "../reading_question/model/reading_question.entity"
+import { RQuestion } from "../reading_subquestions/model/reading_subquestion.entity"
+import { Passage } from "../passages/model/passage.entity"
 
 @Injectable()
 export class ReadingService {
@@ -15,13 +18,35 @@ export class ReadingService {
   }
 
   async findAll(): Promise<Reading[]> {
-    return this.readingRepository.findAll({ include: { all: true } })
+    return this.readingRepository.findAll({
+      include: [
+        {
+          model: ReadingQuestion,
+          include: [RQuestion], // nested include
+        },
+        {
+          model:Passage,
+          include:[Passage]
+        }
+      ],
+    });
   }
 
   async findOne(id: number): Promise<Reading> {
-    const reading = await this.readingRepository.findByPk(id, { include: { all: true } })
-    if (!reading) throw new NotFoundException("Reading not found")
-    return reading
+    const reading = await this.readingRepository.findByPk(id, {
+      include: [
+        {
+          model: ReadingQuestion,
+          include: [RQuestion],
+        },
+        {
+          model:Passage,
+          
+        }
+      ],
+    });
+    if (!reading) throw new NotFoundException("Reading not found");
+    return reading;
   }
 
   async update(id: number, dto: UpdateReadingDto): Promise<Reading> {

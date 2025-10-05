@@ -1,31 +1,31 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { Transform } from "class-transformer"
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { WritingPart } from "@/modules/writing/model/writing-parts"
+import { ApiProperty } from "@nestjs/swagger"
+import { IsNumber, IsString, IsOptional, IsNotEmpty } from "class-validator"
 
 export class CreateWritingAnswerDto {
   @ApiProperty({ example: 1, description: "User ID" })
   @IsNotEmpty()
-   @Transform(({ value }) => Number(value))
-  user_id: number
+  @IsString()
+  user_id: string
 
-  @ApiProperty({ example: 2, description: "Exam ID" })
-  @IsNotEmpty()
-@Transform(({ value }) => Number(value))
+  @ApiProperty({ example: 5, description: "Exam ID" })
+  @IsNumber()
   exam_id: number
 
-  @ApiProperty({ example: 3, description: "Writing Task ID" })
-  @IsNotEmpty()
-   @Transform(({ value }) => Number(value))
+  @ApiProperty({ example: 2, description: "Writing question ID" })
+  @IsNumber()
   writing_id: number
 
-  @ApiProperty({ example: "This is my essay answer text...", description: "Answer text" })
+  @ApiProperty({ example: "This is my essay about environment.", description: "User answer text" })
   @IsString()
-  @IsNotEmpty()
   answer_text: string
 
-  @ApiProperty({ example: "Users wiritng score", description: "Score" })
-  @Transform(({ value }) => Number(value))
-  @IsOptional()
-  score: number
+  @ApiProperty({ example: "PART1", description: "Writing task part (e.g., Task 1 or Task 2)" })
+  @IsString()
+  part: WritingPart
 
+  @ApiProperty({ example: 15, description: "Score for writing task", required: false })
+  @IsOptional()
+  @IsNumber()
+  score?: number
 }

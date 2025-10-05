@@ -12,8 +12,9 @@ export class WritingService {
     ...dto,
     task_image: file ? file.filename : null,
     created_at: new Date(),
-  })
+  });
 }
+
 
   async findAll() {
     return await this.writingRepo.findAll({ include: { all: true } })

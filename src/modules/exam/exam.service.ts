@@ -8,6 +8,8 @@ import { ListeningQuestion } from "../listening_question/entities/listening_ques
 import { Reading } from "../reading";
 import { ReadingQuestion } from "../reading_question/model/reading_question.entity";
 import { Writing } from "../writing/model/writing.model";
+import { RQuestion } from "../reading_subquestions/model/reading_subquestion.entity";
+import { Passage } from "../passages/model/passage.entity";
 
 @Injectable()
 export class ExamService {
@@ -30,7 +32,9 @@ export class ExamService {
         },
         {
           model: Reading,
-          include: [ReadingQuestion],
+          include: [ReadingQuestion
+,Passage
+          ],
         },
         {
           model: Writing,

@@ -10,7 +10,7 @@ export class SpeakingAnswerService {
     private readonly speakingAnswerRepo: typeof SpeakingAnswer,
   ) {}
 
-  async create(dto: CreateSpeakingAnswerDto, audio?: string, photo?: string) {
+  async create(dto: CreateSpeakingAnswerDto) {
     return this.speakingAnswerRepo.create({
       ...dto,
     } as any)

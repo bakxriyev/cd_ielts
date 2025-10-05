@@ -9,9 +9,6 @@ export class Exam extends Model<Exam> {
   @Column({ type: DataType.BIGINT, autoIncrement: true, primaryKey: true })
   id: number;
 
-  @Column({ type: DataType.ENUM("READING", "LISTENING", "WRITING","SPEAKING") })
-  exam_type: string;
-
   @Column({ type: DataType.STRING })
   title: string;
 
