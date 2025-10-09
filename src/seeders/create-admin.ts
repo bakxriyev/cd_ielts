@@ -12,7 +12,7 @@ export class AdminSeed implements OnModuleInit {
   async onModuleInit() {
     // Superadmin mavjudligini tekshiramiz
     const exist = await this.adminModel.findOne({
-      where: { email: 'shjorayev@gmail.com' },
+      where: { email: 'shjurayew@gmail.com' },
     });
     if (!exist) {
       await this.adminModel.create({
