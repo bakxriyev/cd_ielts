@@ -26,7 +26,7 @@ export class ReadingService {
         },
         {
           model:Passage,
-          include:[Passage]
+        
         }
       ],
     });

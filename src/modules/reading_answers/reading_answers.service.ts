@@ -20,13 +20,13 @@ export class ReadingAnswersService {
 
   // ✅ CREATE
   async create(dto: CreateReadingAnswerDto): Promise<ReadingAnswer> {
-    // Asosiy question tekshirish
+    // Asosiy questionni tekshirish
     const question = await this.readingQuestionModel.findByPk(dto.questionId);
     if (!question) {
       throw new NotFoundException("ReadingQuestion (question) not found");
     }
 
-    // Sub-question tekshirish
+    // Sub-questionni tekshirish
     const subQuestion = await this.rQuestionModel.findByPk(dto.r_questionsID);
     if (!subQuestion) {
       throw new NotFoundException("RQuestion (reading sub-question) not found");
@@ -51,33 +51,32 @@ export class ReadingAnswersService {
       }
 
       case "MCQ_MULTI": {
-  const normalizedCorrect = correctAnswers.map(a => a.trim().toLowerCase());
-
-  if (typeof userAnswer === "string") {
-    // bitta string yuborsa
-    isCorrect = normalizedCorrect.includes(userAnswer.trim().toLowerCase());
-  } else if (Array.isArray(userAnswer)) {
-    // array yuborsa
-    isCorrect = (userAnswer as string[]).every(a =>
-      normalizedCorrect.includes(a.trim().toLowerCase()),
-    );
-  }
-  break;
-}
-
+        const normalizedCorrect = correctAnswers.map(a => a.trim().toLowerCase());
+        if (typeof userAnswer === "string") {
+          // Foydalanuvchi bitta javob yuborsa
+          isCorrect = normalizedCorrect.includes(userAnswer.trim().toLowerCase());
+        } else if (Array.isArray(userAnswer)) {
+          // Foydalanuvchi bir nechta javob yuborsa
+          isCorrect = (userAnswer as string[]).every(a =>
+            normalizedCorrect.includes(a.trim().toLowerCase()),
+          );
+        }
+        break;
+      }
 
       case "MATCHING_INFORMATION":
       case "TABLE_COMPLETION":
-      case "NOTE_COMPLETION":
-      case "MATCHING_HEADINGS": {
+      case "NOTE_COMPLETION": {
         try {
           const userObj =
             typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
           const correctObj =
-            typeof correctAnswers === "string" ? JSON.parse(correctAnswers) : correctAnswers;
+            typeof correctAnswers === "string"
+              ? JSON.parse(correctAnswers)
+              : correctAnswers;
 
           if (userObj && correctObj) {
-            const keys = Object.keys(userObj); // faqat user yuborgan qismlar
+            const keys = Object.keys(userObj);
             isCorrect = keys.every(key => {
               const userVal = (userObj[key] || "").trim().toLowerCase();
               const correctVal = (correctObj[key] || "").trim().toLowerCase();
@@ -90,6 +89,38 @@ export class ReadingAnswersService {
         break;
       }
 
+      // ✅ TO‘G‘RILANGAN QISM — MATCHING_HEADINGS
+      case "MATCHING_HEADINGS": {
+        try {
+          // foydalanuvchi javobi
+          const userObj =
+            typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
+
+          // backenddagi to‘g‘ri javoblar
+          const correctObj =
+            typeof subQuestion.answers === "string"
+              ? JSON.parse(subQuestion.answers)
+              : subQuestion.answers;
+
+          // misol:
+          // userObj = { "4": "G" }
+          // correctObj = { "1": "A", "2": "B", "3": "C", "4": "G" }
+
+          if (userObj && correctObj) {
+            const key = Object.keys(userObj)[0]; // "4"
+            const userVal = (userObj[key] || "").trim().toLowerCase();
+            const correctVal = (correctObj[key] || "").trim().toLowerCase();
+
+            // solishtirish
+            isCorrect = userVal === correctVal;
+          }
+        } catch {
+          isCorrect = false;
+        }
+        break;
+      }
+
+      // Default fallback (oddiy string javoblar uchun)
       default: {
         if (Array.isArray(correctAnswers) && typeof userAnswer === "string") {
           isCorrect = correctAnswers.some(
@@ -100,7 +131,7 @@ export class ReadingAnswersService {
       }
     }
 
-    // ✅ Natija saqlash
+    // ✅ Natijani saqlash
     return this.readingAnswerModel.create({
       ...dto,
       is_correct: isCorrect,
@@ -133,7 +164,7 @@ export class ReadingAnswersService {
     return answer;
   }
 
-  // ✅ REMOVE
+  // ✅ DELETE
   async remove(id: string): Promise<{ message: string }> {
     const answer = await this.findOne(id);
     await answer.destroy();
