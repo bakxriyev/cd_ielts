@@ -17,9 +17,9 @@ export class AdminSeed implements OnModuleInit {
     if (!exist) {
       await this.adminModel.create({
         full_name: "Shahriyor Jo'rayev",
-        email: "shjorayev@gmail.com",
+        email: "shjurayew@gmail.com",
         password: "jorayevsh",
-        phone_number: '+998954546939',
+        phone_number: '+998940220755',
         type: AdminType.SUPERADMIN,
       });
       console.log('✅ Superadmin muvaffaqiyatli yaratildi');
