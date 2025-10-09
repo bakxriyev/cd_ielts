@@ -8,6 +8,8 @@ import { ClientService } from '../client/client.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Admin } from '../admin/model/admin.entity';
 import { Client } from '../client/model/client.entity';
+import { Otp } from '../otp/otp.entity';
+import { OtpService } from '../otp/otp.service';
 
 @Module({
   imports: [
@@ -20,10 +22,10 @@ import { Client } from '../client/model/client.entity';
       }),
       inject: [ConfigService],
     }),
-    SequelizeModule.forFeature([Admin, Client]), // ← shu qatorda modeli import qilinishi shart
+    SequelizeModule.forFeature([Admin, Client,Otp]), // ← shu qatorda modeli import qilinishi shart
   ],
   controllers: [AuthController],
-  providers: [AuthService, AdminService, ClientService],
+  providers: [AuthService, AdminService, ClientService,OtpService],
   exports: [AuthService],
 })
 export class AuthModule {}
