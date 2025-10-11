@@ -13,7 +13,8 @@ export enum ListeningQuestionType {
   SUMMARY_DRAG = "SUMMARY_DRAG",
   SHORT_ANSWER = "SHORT_ANSWER",        
   SENTENCE_ENDINGS = "SENTENCE_ENDINGS",                          
-  MAP_LABELING = "MAP_LABELING",                      
+  MAP_LABELING = "MAP_LABELING",      
+  FLOW_CHART = "FLOW_CHART",                
 }
 
 @Table({
