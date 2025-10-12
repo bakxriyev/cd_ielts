@@ -14,7 +14,8 @@ export enum ListeningQuestionType {
   SHORT_ANSWER = "SHORT_ANSWER",        
   SENTENCE_ENDINGS = "SENTENCE_ENDINGS",                          
   MAP_LABELING = "MAP_LABELING",      
-  FLOW_CHART = "FLOW_CHART",                
+  FLOW_CHART = "FLOW_CHART", 
+  NOTE_COMPLETION = "NOTE_COMPLETION",               
 }
 
 @Table({
