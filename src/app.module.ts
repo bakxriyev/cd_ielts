@@ -60,7 +60,7 @@ import { PassagesModule } from './modules/passages/passages.module';
         database: config.get<string>("database.database"),
         autoLoadModels: true,
         synchronize: true,
-        // sync: { force: true },
+        sync: { force: true },
         logging: config.get<string>("app.nodeEnv") === "development",
       }),
     }),
