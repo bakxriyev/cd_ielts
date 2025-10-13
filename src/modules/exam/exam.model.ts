@@ -1,4 +1,11 @@
-import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  BeforeValidate,
+} from "sequelize-typescript";
 import { Reading } from "../reading/reading.model";
 import { Listening } from "../listening/listening.model";
 import { Speaking } from "../speaking/model/speaking.model";
@@ -6,7 +13,11 @@ import { Writing } from "../writing/model/writing.model";
 
 @Table({ tableName: "exams", timestamps: false })
 export class Exam extends Model<Exam> {
-  @Column({ type: DataType.BIGINT, autoIncrement: true, primaryKey: true })
+  @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    allowNull: false,
+  })
   id: number;
 
   @Column({ type: DataType.STRING })
@@ -38,4 +49,21 @@ export class Exam extends Model<Exam> {
 
   @HasMany(() => Writing)
   writings: Writing[];
+
+  // ✅ ID ni validatsiyadan oldin yaratamiz
+  @BeforeValidate
+  static async generateRandomId(exam: Exam) {
+    if (!exam.id) {
+      let unique = false;
+      let newId: number;
+
+      while (!unique) {
+        newId = Math.floor(100000 + Math.random() * 900000);
+        const existing = await Exam.findOne({ where: { id: newId } });
+        if (!existing) unique = true;
+      }
+
+      exam.id = newId;
+    }
+  }
 }

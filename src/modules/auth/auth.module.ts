@@ -10,6 +10,7 @@ import { Admin } from '../admin/model/admin.entity';
 import { Client } from '../client/model/client.entity';
 import { Otp } from '../otp/otp.entity';
 import { OtpService } from '../otp/otp.service';
+import { User, UserService } from '../user';
 
 @Module({
   imports: [
@@ -22,10 +23,10 @@ import { OtpService } from '../otp/otp.service';
       }),
       inject: [ConfigService],
     }),
-    SequelizeModule.forFeature([Admin, Client,Otp]), // ← shu qatorda modeli import qilinishi shart
+    SequelizeModule.forFeature([Admin, Client,Otp,User]), // ← shu qatorda modeli import qilinishi shart
   ],
   controllers: [AuthController],
-  providers: [AuthService, AdminService, ClientService,OtpService],
+  providers: [AuthService, AdminService, ClientService,OtpService,UserService],
   exports: [AuthService],
 })
 export class AuthModule {}

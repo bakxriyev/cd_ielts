@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { OtpService } from "../otp/otp.service";
 import { LoginDto } from "./dto/login.dto";
+import { CreateUserDto } from "../user/dto/create-user.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -13,6 +14,7 @@ export class AuthController {
   ) {}
 
   // ========= LOGINLAR ==========
+
   @Post("admin/login")
   @ApiOperation({ summary: "Admin login" })
   @ApiBody({ type: LoginDto })
@@ -29,6 +31,34 @@ export class AuthController {
   @ApiResponse({ status: 401, description: "Login yoki parol xato" })
   async loginClient(@Body() dto: LoginDto) {
     return this.authService.loginClient(dto);
+  }
+
+  // ========= USER LOGIN & REGISTER ==========
+  @Post("user/register")
+  @ApiOperation({ summary: "Yangi foydalanuvchini ro‘yxatdan o‘tkazish" })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({ status: 201, description: "Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi" })
+  @ApiResponse({ status: 400, description: "Username allaqachon mavjud" })
+  async registerUser(@Body() dto: CreateUserDto) {
+    return this.authService.registerUser(dto);
+  }
+
+  @Post("user/login")
+  @ApiOperation({ summary: "Foydalanuvchi login (username va password orqali)" })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        username: { type: "string", example: "kamron123" },
+        password: { type: "string", example: "12345" },
+      },
+      required: ["username", "password"],
+    },
+  })
+  @ApiResponse({ status: 200, description: "Foydalanuvchi tizimga muvaffaqiyatli kirdi" })
+  @ApiResponse({ status: 401, description: "Username yoki parol xato" })
+  async loginUser(@Body() dto: LoginDto) {
+    return this.authService.loginUser(dto);
   }
 
   // ========= OTP ADMIN ==========
