@@ -31,18 +31,12 @@ export class CreateRQuestionDto {
   @IsString()
   q_text?: string;
 
-  @ApiPropertyOptional({
-    type: [Object],
-    example: [
-      { key: "A", text: "Option A" },
-      { key: "B", text: "Option B" },
-      { key: "C", text: "Option C" },
-    ],
-    description: "Savol variantlari",
+ @ApiProperty({
+    example: '{"A":"Paris","B":"London"}',
+    description: "Options in JSON format",
   })
   @IsOptional()
-  @IsArray()
-  options?: any[];
+  options?: any;
 
   @ApiPropertyOptional({
     type: [String],
