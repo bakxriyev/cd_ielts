@@ -22,10 +22,14 @@ export class ReadingQuestion extends Model<ReadingQuestion> {
   part: string;
 
   @ForeignKey(() => Reading)
-  @Column({ type: DataType.INTEGER })
+  @Column({
+  type: DataType.INTEGER,
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+})
   reading_id: number;
 
-  @BelongsTo(() => Reading)
+  @BelongsTo(() => Reading, { onDelete: "CASCADE",constraints: false  })
   reading: Reading;
 
    @HasMany(() => RQuestion)

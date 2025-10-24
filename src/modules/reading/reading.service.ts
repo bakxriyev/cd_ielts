@@ -54,8 +54,11 @@ export class ReadingService {
     return reading.update(dto)
   }
 
-  async remove(id: number): Promise<void> {
-    const reading = await this.findOne(id)
-    await reading.destroy()
-  }
+async remove(id: number): Promise<void> {
+  const reading = await this.readingRepository.findByPk(id)
+  if (!reading) throw new NotFoundException('Reading not found')
+  await reading.destroy()  // CASCADE o‘zi childlarni o‘chiradi
+}
+
+
 }

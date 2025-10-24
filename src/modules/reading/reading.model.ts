@@ -22,10 +22,10 @@ export class Reading extends Model<Reading> {
   @BelongsTo(() => Exam)
   exam: Exam;
 
-  @HasMany(() => ReadingQuestion)
+  @HasMany(() => ReadingQuestion, { onDelete: "CASCADE", hooks: true})
   questions: ReadingQuestion[];
 
-  @HasMany(() => Passage)
+  @HasMany(() => Passage, { onDelete: "CASCADE", hooks: true })
   passages: Passage[];
-  
+
 }

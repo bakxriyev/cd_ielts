@@ -28,10 +28,15 @@ export class RQuestion extends Model<RQuestion> {
   id: number;
 
   @ForeignKey(() => ReadingQuestion)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+@Column({
+  type: DataType.INTEGER,
+  allowNull: false,
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+})
   reading_questions_id: number;
 
-  @BelongsTo(() => ReadingQuestion)
+  @BelongsTo(() => ReadingQuestion, { onDelete: "CASCADE",constraints: false  })
   reading_question: ReadingQuestion;
 
   @Column({

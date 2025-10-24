@@ -28,8 +28,145 @@ export class ListeningAnswerService {
     let isCorrect = false;
 
     switch (questionType) {
-      // 1️⃣ TRUE_FALSE_NOT_GIVEN & MCQ_SINGLE → oddiy javoblar (masalan "A", "TRUE")
-      case "TFNG":
+      // ✅ 1️⃣ TFNG — bitta-bitta key bilan keladi (masalan {2:"F"})
+      case "TFNG": {
+        try {
+          let userObj: Record<string, any>;
+
+          // JSON ni tozalaymiz
+          if (typeof userAnswer === "string") {
+            try {
+              userObj = JSON.parse(userAnswer);
+            } catch {
+              const fixed = userAnswer
+                .replace(/([{,]\s*)(\d+)(\s*:)/g, '$1"$2"$3')
+                .replace(/'/g, '"');
+              userObj = JSON.parse(fixed);
+            }
+          } else {
+            userObj = userAnswer;
+          }
+
+          const correctObj =
+            typeof correctAnswers === "string"
+              ? JSON.parse(correctAnswers)
+              : correctAnswers;
+
+          const userKeys = Object.keys(userObj || {});
+          if (userKeys.length === 0) {
+            isCorrect = false;
+            break;
+          }
+
+          const key = userKeys[0];
+          const normalize = (val: string) =>
+            String(val || "").trim().toLowerCase();
+
+          const userVal = normalize(userObj[key]);
+          const correctVal = normalize(correctObj[key]);
+
+          isCorrect = userVal === correctVal;
+        } catch (err) {
+          console.error("TFNG parsing error:", err);
+          isCorrect = false;
+        }
+        break;
+      }
+
+      // ✅ 2️⃣ TABLE_COMPLETION — xuddi shunday ishlaydi
+      case "TABLE_COMPLETION": {
+        try {
+          let userObj: Record<string, any>;
+          if (typeof userAnswer === "string") {
+            try {
+              userObj = JSON.parse(userAnswer);
+            } catch {
+              const fixed = userAnswer
+                .replace(/([{,]\s*)(\d+)(\s*:)/g, '$1"$2"$3')
+                .replace(/'/g, '"');
+              userObj = JSON.parse(fixed);
+            }
+          } else {
+            userObj = userAnswer;
+          }
+
+          const correctObj =
+            typeof correctAnswers === "string"
+              ? JSON.parse(correctAnswers)
+              : correctAnswers;
+
+          const userKeys = Object.keys(userObj || {});
+          if (userKeys.length === 0) {
+            isCorrect = false;
+            break;
+          }
+
+          const key = userKeys[0];
+          const normalize = (val: string) =>
+            String(val || "")
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, " ");
+
+          const userVal = normalize(userObj[key]);
+          const correctVal = normalize(correctObj[key]);
+
+          isCorrect = userVal === correctVal;
+        } catch (err) {
+          console.error("TABLE_COMPLETION parsing error:", err);
+          isCorrect = false;
+        }
+        break;
+      }
+
+      // ✅ 3️⃣ SUMMARY_DRAG — bitta-bitta key, uzun text
+      case "SUMMARY_DRAG": {
+        try {
+          let userObj: Record<string, any>;
+
+          if (typeof userAnswer === "string") {
+            try {
+              userObj = JSON.parse(userAnswer);
+            } catch {
+              const fixed = userAnswer
+                .replace(/([{,]\s*)(\d+)(\s*:)/g, '$1"$2"$3')
+                .replace(/'/g, '"');
+              userObj = JSON.parse(fixed);
+            }
+          } else {
+            userObj = userAnswer;
+          }
+
+          const correctObj =
+            typeof correctAnswers === "string"
+              ? JSON.parse(correctAnswers)
+              : correctAnswers;
+
+          const userKeys = Object.keys(userObj || {});
+          if (userKeys.length === 0) {
+            isCorrect = false;
+            break;
+          }
+
+          const key = userKeys[0];
+          const normalize = (val: string) =>
+            String(val || "")
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, " "); // ko‘p bo‘sh joylarni olib tashlaymiz
+
+          const userVal = normalize(userObj[key]);
+          const correctVal = normalize(correctObj[key]);
+
+          isCorrect = userVal === correctVal;
+        } catch (err) {
+          console.error("SUMMARY_DRAG parsing error:", err);
+          isCorrect = false;
+        }
+        break;
+      }
+
+      // ✅ 4️⃣ MCQ_SINGLE va TFNG_OLD (oddiy variantlar)
       case "MCQ_SINGLE": {
         if (Array.isArray(correctAnswers)) {
           const normalizedCorrect = correctAnswers.map(a =>
@@ -41,7 +178,7 @@ export class ListeningAnswerService {
         break;
       }
 
-      // 2️⃣ MCQ_MULTI → foydalanuvchi bir nechta javob tanlagan bo‘lishi mumkin
+      // ✅ 5️⃣ MCQ_MULTI
       case "MCQ_MULTI": {
         const userAnswers = Array.isArray(userAnswer)
           ? userAnswer.map(a => String(a).trim().toLowerCase())
@@ -61,15 +198,16 @@ export class ListeningAnswerService {
         break;
       }
 
-      // 3️⃣ JSON tipidagi javoblar (MATCHING_INFORMATION, TABLE_COMPLETION, MAP_LABELING)
+      // ✅ 6️⃣ MATCHING_INFORMATION, MAP_LABELING
       case "MATCHING_INFORMATION":
-      case "TABLE_COMPLETION":
       case "MAP_LABELING": {
         try {
           const userObj =
             typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
           const correctObj =
-            typeof correctAnswers === "string" ? JSON.parse(correctAnswers) : correctAnswers;
+            typeof correctAnswers === "string"
+              ? JSON.parse(correctAnswers)
+              : correctAnswers;
 
           if (typeof userObj === "object" && typeof correctObj === "object") {
             const allKeys = Object.keys(correctObj);
@@ -87,7 +225,7 @@ export class ListeningAnswerService {
         break;
       }
 
-      // 4️⃣ Qolgan barcha turlar uchun umumiy tekshiruv
+      // ✅ 7️⃣ Default fallback
       default: {
         if (Array.isArray(correctAnswers)) {
           const normalizedCorrect = correctAnswers.map(a =>
@@ -100,7 +238,7 @@ export class ListeningAnswerService {
       }
     }
 
-    // ✅ Natijani saqlash
+    // ✅ Save the result
     const newAnswer = await this.listeningAnswerModel.create({
       ...dto,
       is_correct: isCorrect,

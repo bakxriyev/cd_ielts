@@ -22,13 +22,15 @@ export class Passage extends Model<Passage> {
   id: number;
 
   @ForeignKey(() => Reading)
-  @Column({
+   @Column({
     type: DataType.BIGINT,
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   reading_id: number;
 
-  @BelongsTo(() => Reading)
+   @BelongsTo(() => Reading, { onDelete: 'CASCADE', hooks: true })
   reading: Reading;
 
   @Column({
