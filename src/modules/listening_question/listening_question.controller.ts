@@ -56,15 +56,12 @@ export class ListeningQuestionController {
   }
 
   @Put(":id")
-  @UseInterceptors(FileInterceptor("audio", audioFileOptions))
-  @ApiConsumes("multipart/form-data")
   @ApiBody({ type: UpdateListeningQuestionDto })
   async update(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdateListeningQuestionDto,
-    @UploadedFile() file?: Express.Multer.File,
   ): Promise<ListeningQuestion> {
-    return this.service.update(id, dto, file?.filename);
+    return this.service.update(id, dto);
   }
 
   @Delete(":id")
