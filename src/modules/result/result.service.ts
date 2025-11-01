@@ -8,6 +8,7 @@ import { WritingAnswer } from "../writing_answers/entities/writing_answer.entity
 import { User } from "../user/user.model";
 import { WritingPart } from "../writing/model/writing-parts";
 import { SpeakingAnswer } from "../speaking_answers/entities/speaking_answer.entity";
+import { Exam } from "../exam/exam.model"; // 🟢 YANGI: Exam modelini import qildik
 
 @Injectable()
 export class ResultService {
@@ -17,7 +18,8 @@ export class ResultService {
     @InjectModel(ListeningAnswer) private readonly listeningRepo: typeof ListeningAnswer,
     @InjectModel(WritingAnswer) private readonly writingRepo: typeof WritingAnswer,
     @InjectModel(SpeakingAnswer) private readonly speakingRepo: typeof SpeakingAnswer,
-    @InjectModel(User) private readonly userRepo: typeof User
+    @InjectModel(User) private readonly userRepo: typeof User,
+    @InjectModel(Exam) private readonly examRepo: typeof Exam // 🟢 YANGI: examRepo ni qo‘shdik
   ) {}
 
   // Reading/Listening uchun jadval asosida hisoblash
@@ -125,25 +127,47 @@ export class ResultService {
     const users = await this.userRepo.findAll();
     const results = [];
 
-    for (const user of users) {
-      const readingAns = await this.readingRepo.findOne({
-        where: { userId: user.id },
-        order: [["examId", "DESC"]],
-      });
-      const exam_id = readingAns?.examId ?? 1;
+    // 🟢 examRepo ishlatish uchun modelni qo‘shdik
+    const latestExam = await this.examRepo.findOne({ order: [["id", "DESC"]] });
+    const latestExamId = latestExam?.id ?? null;
 
-      // ✅ endi user.id string bo‘lgani uchun xato chiqmaydi
-      const res = await this.calculateUserResult(user.id, exam_id);
-      results.push({
-        user: { id: user.id, full_name: user.name, email: user.email },
-        exam_id,
-        reading_band_score: res.reading_band_score,
-        listening_band_score: res.listening_band_score,
-        writing_band_score: res.writing_band_score,
-        speaking_score: res.speaking_score,
-        overall_band_score: res.overall_band_score,
-        taken_at: res.taken_at,
-      });
+    for (const user of users) {
+      try {
+        const readingAns = await this.readingRepo.findOne({
+          where: { userId: user.id },
+          order: [["examId", "DESC"]],
+        });
+
+        const exam_id = readingAns?.examId ?? latestExamId;
+
+        if (!exam_id) {
+          console.warn(`Skipping user ${user.id}: no exam_id found and no exams in DB`);
+          continue;
+        }
+
+        const exam = await this.examRepo.findByPk(exam_id);
+        if (!exam) {
+          console.warn(`Skipping user ${user.id}: exam with id=${exam_id} not found`);
+          continue;
+        }
+
+        console.log(`Calculating for user=${user.id}, exam_id=${exam_id}`);
+
+        const res = await this.calculateUserResult(user.id, exam_id);
+
+        results.push({
+          user: { id: user.id, full_name: user.name, email: user.email },
+          exam_id,
+          reading_band_score: res.reading_band_score,
+          listening_band_score: res.listening_band_score,
+          writing_band_score: res.writing_band_score,
+          speaking_score: res.speaking_score,
+          overall_band_score: res.overall_band_score,
+          taken_at: res.taken_at,
+        });
+      } catch (err) {
+        console.error(`Error processing user ${user.id}:`, err);
+      }
     }
 
     return results;
@@ -153,7 +177,6 @@ export class ResultService {
     return this.resultRepo.findAll({ include: [User] });
   }
 
-  // ✅ user_id endi string
   async findByUserId(user_id: string) {
     const result = await this.resultRepo.findAll({ where: { user_id }, include: [User] });
     if (!result.length) throw new NotFoundException("Results not found for this user");
