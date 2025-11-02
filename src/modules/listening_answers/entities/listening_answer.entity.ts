@@ -43,8 +43,9 @@ export class ListeningAnswer extends Model<ListeningAnswer> {
   @BelongsTo(() => Exam)
   exam: Exam
 
-  @BelongsTo(() => LQuestion)
-  lQuestion: LQuestion;
+  // 🟢 LQuestion bilan alias belgilanadi
+  @BelongsTo(() => LQuestion, { as: "l_question" }) // <-- MUHIM
+  l_question: LQuestion;
 
   @BelongsTo(() => ListeningQuestion)
   question: ListeningQuestion

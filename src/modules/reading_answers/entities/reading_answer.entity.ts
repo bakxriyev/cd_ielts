@@ -36,11 +36,14 @@ export class ReadingAnswer extends Model<ReadingAnswer> {
   question_type: string;
 
   // RQuestion bilan bog'lanish
+
+
+   // 🟢 RQuestion bilan to‘g‘ri aloqasi (as: "r_question")
   @ForeignKey(() => RQuestion)
   @Column({ type: DataType.INTEGER, allowNull: true })
   r_questionsID: number;
 
-  @BelongsTo(() => RQuestion)
+  @BelongsTo(() => RQuestion, { as: "r_question" }) // <-- MUHIM
   r_question: RQuestion;
 
   @ForeignKey(() => Exam)

@@ -68,37 +68,48 @@ export class ReadingAnswersService {
       }
 
       // ✅ TABLE_COMPLETION — jadval bo‘yicha to‘g‘ri tekshirish
-      case "TABLE_COMPLETION": {
-        try {
-          const userObj =
-            typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
+     case "TABLE_COMPLETION": {
+  try {
+    const userObj =
+      typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
 
-          const correctChoices =
-            typeof subQuestion.choices === "string"
-              ? JSON.parse(subQuestion.choices)
-              : subQuestion.choices;
+    const correctAnswers =
+      typeof subQuestion.answers === "string"
+        ? JSON.parse(subQuestion.answers)
+        : subQuestion.answers;
 
-          if (userObj && correctChoices) {
-            const keys = Object.keys(userObj);
+    if (userObj && correctAnswers) {
+      // 🔧 Kuchli normalize funksiyasi
+      const normalize = (str: string) => {
+        return str
+          .toLowerCase()
+          .replace(/[^\w\s]/g, "") // punktuatsiyalarni olib tashlaydi
+          .replace(/\b(the|a|an)\b/g, "") // 'the', 'a', 'an' ni olib tashlaydi
+          .trim()
+          .split(/\s+/) // so‘zlarga ajratadi
+          .filter(Boolean)
+          .sort() // so‘zlarni alifbo tartibida joylashtiradi
+          .join(" "); // qayta stringga aylantiradi
+      };
 
-            isCorrect = keys.every(key => {
-              const userVal = (userObj[key] || "").trim().toLowerCase();
-              const correctVal = (correctChoices[key] || "").trim().toLowerCase();
+      const keys = Object.keys(userObj);
+      isCorrect = keys.every(key => {
+        const userVal = (userObj[key] || "").toString();
+        const correctVal = (correctAnswers[key] || "").toString();
 
-              if (userVal && correctVal) {
-                return normalize(userVal) === normalize(correctVal);
-              }
-              return false;
-            });
-          } else {
-            isCorrect = false;
-          }
-        } catch (error) {
-          console.error("TABLE_COMPLETION check error:", error);
-          isCorrect = false;
-        }
-        break;
-      }
+        if (!correctVal) return false;
+        return normalize(userVal) === normalize(correctVal);
+      });
+    } else {
+      isCorrect = false;
+    }
+  } catch (error) {
+    console.error("TABLE_COMPLETION check error:", error);
+    isCorrect = false;
+  }
+  break;
+}
+
 
       // ✅ MATCHING_INFORMATION — to‘g‘ri logika
       case "MATCHING_INFORMATION": {
@@ -153,28 +164,109 @@ export class ReadingAnswersService {
       }
 
       // ✅ NOTE_COMPLETION
-      case "NOTE_COMPLETION": {
-        try {
-          const userObj =
-            typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
-          const correctObj =
-            typeof correctAnswers === "string"
-              ? JSON.parse(correctAnswers)
-              : correctAnswers;
+case "NOTE_COMPLETION": {
+  try {
+    const userObj =
+      typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
 
-          if (userObj && correctObj) {
-            const keys = Object.keys(userObj);
-            isCorrect = keys.every(key => {
-              const userVal = (userObj[key] || "").trim().toLowerCase();
-              const correctVal = (correctObj[key] || "").trim().toLowerCase();
-              return normalize(userVal) === normalize(correctVal);
-            });
-          }
-        } catch {
-          isCorrect = false;
-        }
-        break;
-      }
+    const correctAnswers =
+      typeof subQuestion.answers === "string"
+        ? JSON.parse(subQuestion.answers)
+        : subQuestion.answers;
+
+    if (userObj && correctAnswers) {
+      // 🔧 Kuchli normalize funksiyasi
+      const normalize = (str: string) =>
+        str
+          ?.toLowerCase()
+          .replace(/[^\w\s]/g, "") // punktuatsiyani olib tashlaydi
+          .trim()
+          .split(/\s+/) // so‘zlarga ajratadi
+          .filter(Boolean)
+          .sort() // tartibni yo‘qotadi
+          .join(" ");
+
+      const keys = Object.keys(userObj); // masalan ["1"]
+
+      // Har bir foydalanuvchi javobi uchun tekshirish
+      isCorrect = keys.every(key => {
+        const userVal = userObj[key] || "";
+        const correctVal = correctAnswers[key] || "";
+        if (!correctVal) return false;
+        return normalize(userVal) === normalize(correctVal);
+      });
+    } else {
+      isCorrect = false;
+    }
+  } catch (error) {
+    console.error("NOTE_COMPLETION check error:", error);
+    isCorrect = false;
+  }
+  break;
+}
+
+      case "SENTENCE_ENDINGS": {
+  try {
+    const userObj =
+      typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
+
+    const correctAnswers =
+      typeof subQuestion.answers === "string"
+        ? JSON.parse(subQuestion.answers)
+        : subQuestion.answers;
+
+    if (userObj && correctAnswers) {
+      const normalize = (val: string) =>
+        val?.trim().toLowerCase().replace(/\s+/g, "") || "";
+
+      const keys = Object.keys(userObj); // masalan ["1"]
+      isCorrect = keys.every(key => {
+        const userVal = normalize(userObj[key] || "");
+        const correctVal = normalize(correctAnswers[key] || "");
+        return userVal === correctVal;
+      });
+    } else {
+      isCorrect = false;
+    }
+  } catch (error) {
+    console.error("SENTENCE_ENDINGS check error:", error);
+    isCorrect = false;
+  }
+  break;
+}
+case "SUMMARY_DRAG": {
+  try {
+    const userObj =
+      typeof userAnswer === "string" ? JSON.parse(userAnswer) : userAnswer;
+
+    const correctAnswers =
+      typeof subQuestion.answers === "string"
+        ? JSON.parse(subQuestion.answers)
+        : subQuestion.answers;
+
+    if (userObj && correctAnswers) {
+      const normalize = (val: string) =>
+        val?.toLowerCase().trim().replace(/\s+/g, "") || "";
+
+      const keys = Object.keys(userObj); // masalan ["3"]
+
+      // Har bir user javobini tekshiramiz
+      isCorrect = keys.every(key => {
+        const userVal = normalize(userObj[key] || "");
+        const correctVal = normalize(correctAnswers[key] || "");
+        return userVal === correctVal;
+      });
+    } else {
+      isCorrect = false;
+    }
+  } catch (error) {
+    console.error("SUMMARY_DRAG check error:", error);
+    isCorrect = false;
+  }
+  break;
+}
+
+
 
       // Default
       default: {

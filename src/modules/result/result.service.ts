@@ -8,7 +8,9 @@ import { WritingAnswer } from "../writing_answers/entities/writing_answer.entity
 import { User } from "../user/user.model";
 import { WritingPart } from "../writing/model/writing-parts";
 import { SpeakingAnswer } from "../speaking_answers/entities/speaking_answer.entity";
-import { Exam } from "../exam/exam.model"; // 🟢 YANGI: Exam modelini import qildik
+import { Exam } from "../exam/exam.model";
+import { RQuestion } from "../reading_subquestions/model/reading_subquestion.entity";
+import { LQuestion } from "../l_questions/entities/l_question.entity";
 
 @Injectable()
 export class ResultService {
@@ -19,10 +21,10 @@ export class ResultService {
     @InjectModel(WritingAnswer) private readonly writingRepo: typeof WritingAnswer,
     @InjectModel(SpeakingAnswer) private readonly speakingRepo: typeof SpeakingAnswer,
     @InjectModel(User) private readonly userRepo: typeof User,
-    @InjectModel(Exam) private readonly examRepo: typeof Exam // 🟢 YANGI: examRepo ni qo‘shdik
+    @InjectModel(Exam) private readonly examRepo: typeof Exam
   ) {}
 
-  // Reading/Listening uchun jadval asosida hisoblash
+  // 📊 Reading/Listening uchun band hisoblash jadvali
   private calculateBandFromTable(correct: number): number {
     if (correct >= 39) return 9;
     if (correct >= 37) return 8.5;
@@ -101,7 +103,7 @@ export class ResultService {
         writing_band_score,
         speaking_score,
         overall_band_score,
-        taken_at: new Date()
+        taken_at: new Date(),
       });
     }
 
@@ -119,7 +121,7 @@ export class ResultService {
       writing_band_score,
       speaking_score,
       overall_band_score,
-      taken_at: new Date()
+      taken_at: new Date(),
     });
   }
 
@@ -127,7 +129,6 @@ export class ResultService {
     const users = await this.userRepo.findAll();
     const results = [];
 
-    // 🟢 examRepo ishlatish uchun modelni qo‘shdik
     const latestExam = await this.examRepo.findOne({ order: [["id", "DESC"]] });
     const latestExamId = latestExam?.id ?? null;
 
@@ -140,18 +141,10 @@ export class ResultService {
 
         const exam_id = readingAns?.examId ?? latestExamId;
 
-        if (!exam_id) {
-          console.warn(`Skipping user ${user.id}: no exam_id found and no exams in DB`);
-          continue;
-        }
+        if (!exam_id) continue;
 
         const exam = await this.examRepo.findByPk(exam_id);
-        if (!exam) {
-          console.warn(`Skipping user ${user.id}: exam with id=${exam_id} not found`);
-          continue;
-        }
-
-        console.log(`Calculating for user=${user.id}, exam_id=${exam_id}`);
+        if (!exam) continue;
 
         const res = await this.calculateUserResult(user.id, exam_id);
 
@@ -218,4 +211,101 @@ export class ResultService {
     await result.destroy();
     return { message: "Result deleted successfully" };
   }
+
+  // 🟢 YANGI: user_id va exam_id orqali barcha javoblarni qaytaruvchi API
+// 🟢 YANGI: user_id va exam_id orqali barcha javoblarni qaytaruvchi API
+async getUserExamAnswers(user_id: string, exam_id: number) {
+  // 🔹 1. READING ANSWERS
+  const readingAnswers = await this.readingRepo.findAll({
+    where: { userId: user_id, examId: exam_id },
+    include: [
+      {
+        model: RQuestion,
+        as: "r_question",
+        attributes: [
+          "id",
+          "q_type",
+          "q_text",
+          "options",
+          "correct_answers",
+          "answers", // qo‘shildi
+        ],
+      },
+    ],
+    attributes: [
+      "id",
+      "questionId",
+      "question_type",
+      "answer",
+      "is_correct",
+      "examId",
+    ],
+  });
+
+  const reading = readingAnswers.map((ans) => ({
+    question_id: ans.questionId,
+    question_type: ans.r_question?.q_type || ans.question_type,
+    question_text: ans.r_question?.q_text || null,
+    user_answer: ans.answer,
+    correct_answer: ans.r_question?.correct_answers || [],
+    answers: ans.r_question?.answers || [], // ✅ yangi qo‘shildi
+    is_correct: ans.is_correct,
+    options: ans.r_question?.options || [],
+  }));
+
+  // 🔹 2. LISTENING ANSWERS
+  const listeningAnswers = await this.listeningRepo.findAll({
+    where: { userId: user_id, examId: exam_id },
+    include: [
+      {
+        model: LQuestion,
+        as: "l_question", // alias modeldagi bilan to‘g‘ri bo‘lishi kerak
+        attributes: [
+          "id",
+          "q_type",
+          "q_text",
+          "options",
+          "correct_answers",
+          "answers", // qo‘shildi
+        ],
+      },
+    ],
+    attributes: [
+      "id",
+      "questionId",
+      "question_type",
+      "answer",
+      "is_correct",
+      "examId",
+    ],
+  });
+
+  const listening = listeningAnswers.map((ans) => ({
+    question_id: ans.questionId,
+    question_type: ans.l_question?.q_type || ans.question_type,
+    question_text: ans.l_question?.q_text || null,
+    user_answer: ans.answer,
+    correct_answer: ans.l_question?.correct_answers || [],
+    answers: ans.l_question?.answers || [], // ✅ yangi qo‘shildi
+    is_correct: ans.is_correct,
+    options: ans.l_question?.options || [],
+  }));
+
+  // 🔹 3. Umumiy response
+  return {
+    user_id,
+    exam_id,
+    reading,
+    listening,
+  };
+}
+
+
+
+
+
+
+
+
+
 }

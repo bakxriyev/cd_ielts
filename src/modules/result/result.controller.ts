@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Param, Body, Query, Delete, Put, ParseIntPipe } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Query,
+  Delete,
+  Put,
+  ParseIntPipe,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiParam, ApiQuery } from "@nestjs/swagger";
 import { ResultService } from "./result.service";
 import { UpdateResultDto } from "./dto";
@@ -58,4 +68,16 @@ export class ResultController {
   async remove(@Param("id", ParseIntPipe) id: number) {
     return this.resultService.remove(id);
   }
+
+ @Get("answers/:user_id/:exam_id")
+  @ApiOperation({ summary: "Get all reading and listening answers (with correct answers) for a specific exam" })
+  @ApiParam({ name: "user_id", type: String, example: "REI000001" })
+  @ApiParam({ name: "exam_id", type: Number, example: 420409 })
+  async getUserExamAnswers(
+    @Param("user_id") user_id: string,
+    @Param("exam_id", ParseIntPipe) exam_id: number
+  ) {
+    return this.resultService.getUserExamAnswers(user_id, exam_id);
+  }
+
 }
