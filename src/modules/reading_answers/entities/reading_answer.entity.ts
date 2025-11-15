@@ -58,6 +58,5 @@ export class ReadingAnswer extends Model<ReadingAnswer> {
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   is_correct: boolean;
-
-
+  
 }

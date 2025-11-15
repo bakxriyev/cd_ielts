@@ -70,14 +70,15 @@ export class ResultController {
   }
 
  @Get("answers/:user_id/:exam_id")
-  @ApiOperation({ summary: "Get all reading and listening answers (with correct answers) for a specific exam" })
-  @ApiParam({ name: "user_id", type: String, example: "REI000001" })
-  @ApiParam({ name: "exam_id", type: Number, example: 420409 })
-  async getUserExamAnswers(
-    @Param("user_id") user_id: string,
-    @Param("exam_id", ParseIntPipe) exam_id: number
-  ) {
-    return this.resultService.getUserExamAnswers(user_id, exam_id);
-  }
+@ApiOperation({ summary: "Get ALL answers (reading, listening, writing, speaking) for a specific exam" })
+@ApiParam({ name: "user_id", type: String, example: "REI000001" })
+@ApiParam({ name: "exam_id", type: Number, example: 420409 })
+async getUserExamAnswers(
+  @Param("user_id") user_id: string,
+  @Param("exam_id", ParseIntPipe) exam_id: number
+) {
+  return this.resultService.getUserExamAnswers(user_id, exam_id);
+}
+
 
 }
